@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#171717">
+<title>Meu Treino — 5K em 35 min</title>
+<style>
+:root{
+  --bg:#f5f5f5; --card:#fff; --text:#191919; --muted:#737373;
+  --accent:#222; --soft:#ededed; --green:#16803c; --danger:#b42318;
+  --shadow:0 8px 24px rgba(0,0,0,.07); --radius:18px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
+button{font:inherit;cursor:pointer}
+.app{max-width:1050px;margin:auto;padding:18px 16px 40px}
+header{
+  background:#171717;color:#fff;border-radius:24px;padding:25px 22px;
+  box-shadow:var(--shadow);margin-bottom:16px
+}
+header h1{margin:0 0 6px;font-size:28px}
+header p{margin:0;color:#cfcfcf}
+.goal{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px}
+.stat{background:#292929;border-radius:14px;padding:14px}
+.stat small{display:block;color:#aaa;font-size:12px;margin-bottom:5px}
+.stat strong{font-size:20px}
+.progress-wrap{margin-top:18px}
+.progress-top{display:flex;justify-content:space-between;font-size:13px;color:#ccc;margin-bottom:7px}
+.progress{height:9px;background:#3a3a3a;border-radius:20px;overflow:hidden}
+.progress>div{height:100%;background:#fff;width:0%;transition:.3s}
+
+.tabs{display:flex;gap:8px;overflow:auto;margin:14px 0}
+.tab{border:0;background:#fff;padding:11px 15px;border-radius:12px;white-space:nowrap;font-weight:700}
+.tab.active{background:#171717;color:#fff}
+
+.week-title{display:flex;justify-content:space-between;align-items:center;margin:16px 2px 10px}
+.week-title h2{margin:0;font-size:21px}
+.week-title button{border:0;background:#fff;padding:8px 11px;border-radius:10px}
+
+.day-card{
+  background:var(--card);border-radius:var(--radius);padding:18px;
+  margin-bottom:14px;box-shadow:var(--shadow)
+}
+.day-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.day-head h3{margin:0 0 5px;font-size:20px}
+.day-head p{margin:0;color:var(--muted);font-size:13px}
+.badge{font-size:12px;background:var(--soft);padding:7px 9px;border-radius:999px;font-weight:700}
+.section{margin-top:17px}
+.section h4{margin:0 0 9px;font-size:14px}
+.exercise{
+  display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;
+  padding:11px 0;border-bottom:1px solid #eee
+}
+.exercise:last-child{border-bottom:0}
+.exercise input{width:19px;height:19px;accent-color:#222}
+.exercise-name{font-weight:650}
+.exercise-detail{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.exercise-actions{display:flex;gap:5px}
+.mini{border:0;background:#f1f1f1;border-radius:9px;padding:6px 8px;font-size:12px}
+.completed .exercise-name{text-decoration:line-through;color:#999}
+
+.run-box{
+  background:#f1f1f1;border-radius:14px;padding:13px;margin-top:10px
+}
+.run-box strong{display:block;margin-bottom:4px}
+.run-box span{color:#555;font-size:13px}
+
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}
+.primary,.secondary{
+  border:0;border-radius:12px;padding:11px 14px;font-weight:800
+}
+.primary{background:#171717;color:#fff}
+.secondary{background:#ededed;color:#222}
+
+.timer{
+  position:fixed;inset:auto 16px 16px auto;width:min(360px,calc(100% - 32px));
+  background:#171717;color:#fff;border-radius:20px;padding:18px;
+  box-shadow:0 18px 50px rgba(0,0,0,.28);display:none;z-index:20
+}
+.timer.show{display:block}
+.timer-top{display:flex;justify-content:space-between;align-items:center}
+.timer h3{margin:0}
+.timer-display{text-align:center;font-size:54px;font-weight:900;letter-spacing:2px;margin:12px 0}
+.timer-controls{display:flex;gap:7px}
+.timer-controls button{flex:1;border:0;border-radius:10px;padding:10px;font-weight:800}
+.timer-controls button:first-child{background:#fff}
+.timer-controls button:not(:first-child){background:#333;color:#fff}
+.timer input{width:100%;padding:10px;border:0;border-radius:10px;margin-top:10px}
+
+.empty{background:#fff;border-radius:18px;padding:25px;text-align:center;color:var(--muted)}
+footer{text-align:center;color:#888;font-size:12px;margin-top:25px}
+
+@media(max-width:650px){
+  .goal{grid-template-columns:1fr 1fr}
+  .stat:last-child{grid-column:span 2}
+  header h1{font-size:24px}
+  .exercise{grid-template-columns:auto 1fr}
+  .exercise-actions{grid-column:2}
+  .badge{display:none}
+}
+
+.exercise-help{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap}
+.help-link{display:inline-block;text-decoration:none;background:#f4f4f4;color:#333;border-radius:8px;padding:4px 7px;font-size:11px;font-weight:700}
+.help-link:hover{background:#e8e8e8}
+
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <h1>🏃 Meu Treino — 5K em 35 min</h1>
+  <p>Plano de 4 semanas • Segunda a sexta • corrida + fortalecimento</p>
+
+  <div class="goal">
+    <div class="stat"><small>PACE ATUAL</small><strong>7:50/km</strong></div>
+    <div class="stat"><small>PACE ALVO</small><strong>7:00/km</strong></div>
+    <div class="stat"><small>META</small><strong>5 km • 35 min</strong></div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-top"><span>Progresso geral</span><span id="progressText">0%</span></div>
+    <div class="progress"><div id="progressBar"></div></div>
+  </div>
+</header>
+
+<div style="background:#fff;border-radius:14px;padding:13px 15px;margin-bottom:12px;box-shadow:var(--shadow);font-size:13px;color:#555">
+  💡 <strong>Dica:</strong> cada exercício tem um botão <strong>📷 Ver execução</strong> ou <strong>▶ Ver vídeo</strong>.
+  <br>🏃 Nos treinos de corrida, o <strong>ritmo (pace)</strong> já aparece convertido para a <strong>velocidade da esteira em km/h</strong>.
+</div>
+<div class="tabs" id="tabs"></div>
+<div id="content"></div>
+
+<footer>Seu progresso fica salvo automaticamente neste navegador.</footer>
+</div>
+
+<div class="timer" id="timer">
+  <div class="timer-top">
+    <h3>⏱️ Cronômetro</h3>
+    <button class="mini" onclick="closeTimer()">Fechar</button>
+  </div>
+  <input id="timerLabel" placeholder="Ex.: Recuperação">
+  <div class="timer-display" id="timerDisplay">02:00</div>
+  <div class="timer-controls">
+    <button onclick="toggleTimer()" id="timerStart">Iniciar</button>
+    <button onclick="resetTimer()">Resetar</button>
+  </div>
+</div>
+
+<script>
+
+const exerciseResources = {
+ "Dead bug": ["https://www.nasm.org/resource-center/exercise-library/dead-bug","📷 Ver execução"],
+ "Terra romeno com halteres": ["https://www.nasm.org/resource-center/exercise-library/dumbbell-romanian-deadlift","📷 Ver execução"],
+ "Terra romeno": ["https://www.nasm.org/resource-center/exercise-library/dumbbell-romanian-deadlift","📷 Ver execução"],
+ "Agachamento guiado": ["https://www.youtube.com/results?search_query=agachamento+guiado+smith+execucao+correta","▶ Ver vídeo"],
+ "Coice": ["https://www.youtube.com/results?search_query=coice+gluteo+cabo+execucao+correta","▶ Ver vídeo"],
+ "Afundo": ["https://www.youtube.com/results?search_query=afundo+halteres+execucao+correta","▶ Ver vídeo"],
+ "Panturrilha": ["https://www.youtube.com/results?search_query=panturrilha+em+pe+execucao+correta","▶ Ver vídeo"],
+ "Panturrilha em pé": ["https://www.youtube.com/results?search_query=panturrilha+em+pe+execucao+correta","▶ Ver vídeo"],
+ "Prancha": ["https://www.youtube.com/results?search_query=prancha+abdominal+execucao+correta","▶ Ver vídeo"],
+ "Prancha lateral": ["https://www.youtube.com/results?search_query=prancha+lateral+execucao+correta","▶ Ver vídeo"],
+ "Elevação lateral": ["https://www.youtube.com/results?search_query=elevacao+lateral+halteres+execucao+correta","▶ Ver vídeo"],
+ "Desenvolvimento com halteres": ["https://www.youtube.com/results?search_query=desenvolvimento+ombros+halteres+execucao+correta","▶ Ver vídeo"],
+ "Desenvolvimento": ["https://www.youtube.com/results?search_query=desenvolvimento+ombros+halteres+execucao+correta","▶ Ver vídeo"],
+ "Agachamento sumô com kettlebell": ["https://www.youtube.com/results?search_query=agachamento+sumo+kettlebell+execucao+correta","▶ Ver vídeo"],
+ "Agachamento sumô": ["https://www.youtube.com/results?search_query=agachamento+sumo+kettlebell+execucao+correta","▶ Ver vídeo"],
+ "Remada": ["https://www.youtube.com/results?search_query=remada+maquina+execucao+correta","▶ Ver vídeo"],
+ "Remada na máquina": ["https://www.youtube.com/results?search_query=remada+maquina+execucao+correta","▶ Ver vídeo"],
+ "Puxada": ["https://www.youtube.com/results?search_query=puxada+frontal+maquina+execucao+correta","▶ Ver vídeo"],
+ "Fly": ["https://www.youtube.com/results?search_query=fly+maquina+peito+execucao+correta","▶ Ver vídeo"],
+ "Flexão": ["https://www.youtube.com/results?search_query=flexao+de+braco+execucao+correta","▶ Ver vídeo"],
+ "Rosca direta": ["https://www.youtube.com/results?search_query=rosca+direta+halteres+execucao+correta","▶ Ver vídeo"],
+ "Tríceps": ["https://www.youtube.com/results?search_query=triceps+polia+execucao+correta","▶ Ver vídeo"],
+ "Elevação de pernas": ["https://www.youtube.com/results?search_query=elevacao+de+pernas+abdominal+execucao+correta","▶ Ver vídeo"],
+ "Abdominal": ["https://www.youtube.com/results?search_query=abdominal+execucao+correta","▶ Ver vídeo"],
+ "Mobilidade de quadril": ["https://www.youtube.com/results?search_query=mobilidade+quadril+corredor","▶ Ver vídeo"],
+ "Mobilidade de tornozelo": ["https://www.youtube.com/results?search_query=mobilidade+tornozelo+corredor","▶ Ver vídeo"]
+};
+
+const plans = [
+{
+ week:1,
+ days:[
+ {day:"SEGUNDA",focus:"Velocidade + pernas",time:"60–70 min",
+  run:"5 × 400 m",pace:"6:40–6:55/km",rest:120,
+  exercises:[
+   ["Agachamento guiado","3 × 10–12"],
+   ["Coice","3 × 12 cada perna"],
+   ["Terra romeno com halteres","3 × 10–12"],
+   ["Afundo","3 × 10 cada perna"],
+   ["Panturrilha em pé","3 × 15–20"],
+   ["Prancha","3 × 30–45 s"]
+  ]},
+ {day:"TERÇA",focus:"Parte superior + cardio",time:"55–65 min",
+  run:"Bike intervalada",pace:"20–25 min • 1 min forte / 2 min moderado",rest:120,
+  exercises:[
+   ["Remada na máquina","3 × 10–12"],
+   ["Puxada","3 × 10–12"],
+   ["Fly","3 × 10–12"],
+   ["Flexão","3 × 8–12"],
+   ["Elevação lateral","3 × 12–15"],
+   ["Desenvolvimento com halteres","3 × 10–12"],
+   ["Rosca direta","2 × 12"],
+   ["Tríceps","2 × 12"]
+  ]},
+ {day:"QUARTA",focus:"Corrida de ritmo + core",time:"50–60 min",
+  run:"3 × 8 min",pace:"7:15–7:30/km",rest:120,
+  exercises:[
+   ["Prancha","3 × 40 s"],["Prancha lateral","3 × 25–30 s cada lado"],
+   ["Dead bug","3 × 10 cada lado"],["Elevação de pernas","3 × 10–12"]
+  ]},
+ {day:"QUINTA",focus:"Pernas + glúteos",time:"60–70 min",
+  run:"Bike leve",pace:"10–15 min moderada",rest:90,
+  exercises:[
+   ["Agachamento guiado","4 × 8–10"],
+   ["Terra romeno com halteres","3 × 10"],
+   ["Afundo","3 × 10 cada perna"],
+   ["Coice","3 × 12–15 cada perna"],
+   ["Agachamento sumô com kettlebell","3 × 12"],
+   ["Panturrilha","4 × 15–20"],
+   ["Abdominal","3 × 15"]
+  ]},
+ {day:"SEXTA",focus:"Corrida longa",time:"45–60 min",
+  run:"5 km",pace:"7:50–8:10/km",rest:120,exercises:[]}
+ ]
+},
+{
+ week:2,
+ days:[
+ {day:"SEGUNDA",focus:"Velocidade + pernas",time:"60–70 min",run:"6 × 400 m",pace:"6:40–6:55/km",rest:120,
+ exercises:[["Agachamento guiado","3 × 10–12"],["Coice","3 × 12 cada perna"],["Terra romeno com halteres","3 × 10–12"],["Afundo","3 × 10 cada perna"],["Panturrilha","3 × 15–20"],["Prancha","3 × 30–45 s"]]},
+ {day:"TERÇA",focus:"Parte superior + cardio",time:"55–65 min",run:"Bike intervalada",pace:"20–25 min",rest:120,
+ exercises:[["Remada","3 × 10–12"],["Puxada","3 × 10–12"],["Fly","3 × 10–12"],["Flexão","3 × 8–12"],["Elevação lateral","3 × 12–15"],["Desenvolvimento","3 × 10–12"],["Rosca direta","2 × 12"],["Tríceps","2 × 12"]]},
+ {day:"QUARTA",focus:"Corrida de ritmo + core",time:"50–60 min",run:"2 × 12 min",pace:"7:10–7:20/km",rest:150,
+ exercises:[["Prancha","3 × 40 s"],["Prancha lateral","3 × 25–30 s"],["Dead bug","3 × 10 cada lado"],["Elevação de pernas","3 × 10–12"]]},
+ {day:"QUINTA",focus:"Pernas + glúteos",time:"60–70 min",run:"Bike leve",pace:"10–15 min",rest:90,
+ exercises:[["Agachamento guiado","4 × 8–10"],["Terra romeno","3 × 10"],["Afundo","3 × 10 cada perna"],["Coice","3 × 12–15"],["Agachamento sumô","3 × 12"],["Panturrilha","4 × 15–20"],["Abdominal","3 × 15"]]},
+ {day:"SEXTA",focus:"Corrida longa",time:"45–60 min",run:"5,5 km",pace:"7:40–8:00/km",rest:120,exercises:[]}
+ ]
+},
+{
+ week:3,
+ days:[
+ {day:"SEGUNDA",focus:"Velocidade + pernas",time:"60–70 min",run:"5 × 600 m",pace:"6:40–6:55/km",rest:120,
+ exercises:[["Agachamento guiado","3 × 10"],["Coice","3 × 12"],["Terra romeno","3 × 10"],["Afundo","3 × 10 cada perna"],["Panturrilha","3 × 15–20"],["Prancha","3 × 40 s"]]},
+ {day:"TERÇA",focus:"Parte superior + cardio",time:"55–65 min",run:"Bike intervalada",pace:"20–25 min",rest:120,
+ exercises:[["Remada","3 × 10–12"],["Puxada","3 × 10–12"],["Fly","3 × 10–12"],["Flexão","3 × 8–12"],["Elevação lateral","3 × 12–15"],["Desenvolvimento","3 × 10–12"],["Rosca direta","2 × 12"],["Tríceps","2 × 12"]]},
+ {day:"QUARTA",focus:"Corrida contínua + core",time:"50–60 min",run:"20–25 min contínuos",pace:"7:05–7:15/km",rest:120,
+ exercises:[["Prancha","3 × 40 s"],["Prancha lateral","3 × 30 s"],["Dead bug","3 × 10 cada lado"],["Elevação de pernas","3 × 10–12"]]},
+ {day:"QUINTA",focus:"Pernas + glúteos",time:"60–70 min",run:"Bike leve",pace:"10–15 min",rest:90,
+ exercises:[["Agachamento guiado","4 × 8–10"],["Terra romeno","3 × 10"],["Afundo","3 × 10 cada perna"],["Coice","3 × 12–15"],["Agachamento sumô","3 × 12"],["Panturrilha","4 × 15–20"],["Abdominal","3 × 15"]]},
+ {day:"SEXTA",focus:"Corrida longa",time:"45–60 min",run:"6 km",pace:"7:35–7:55/km",rest:120,exercises:[]}
+ ]
+},
+{
+ week:4,
+ days:[
+ {day:"SEGUNDA",focus:"Velocidade reduzida",time:"45–55 min",run:"4 × 400 m",pace:"6:30–6:45/km",rest:120,
+ exercises:[["Agachamento guiado","2 × 10"],["Coice","2 × 12"],["Terra romeno","2 × 10"],["Panturrilha","2 × 15"],["Prancha","2 × 30–40 s"]]},
+ {day:"TERÇA",focus:"Parte superior leve + cardio",time:"45–55 min",run:"Bike moderada",pace:"15–20 min",rest:90,
+ exercises:[["Remada","2 × 10–12"],["Puxada","2 × 10–12"],["Fly","2 × 10–12"],["Elevação lateral","2 × 12–15"],["Tríceps","2 × 12"]]},
+ {day:"QUARTA",focus:"Ritmo leve",time:"40–50 min",run:"15–20 min",pace:"próximo de 7:00/km, sem forçar",rest:120,
+ exercises:[["Prancha","2 × 30–40 s"],["Dead bug","2 × 10 cada lado"],["Mobilidade de quadril","5 min"]]},
+ {day:"QUINTA",focus:"Recuperação",time:"30–40 min",run:"Bike ou caminhada",pace:"20–25 min bem leve",rest:90,
+ exercises:[["Mobilidade de tornozelo","2 × 10 cada lado"],["Mobilidade de quadril","2 × 10 cada lado"],["Panturrilha leve","2 × 15"]]},
+ {day:"SEXTA",focus:"Corrida pré-prova",time:"30–40 min",run:"4 km",pace:"7:45–8:00/km",rest:120,exercises:[]}
+ ]
+}
+];
+
+let currentWeek = Number(localStorage.getItem("currentWeek") || 1);
+let checks = JSON.parse(localStorage.getItem("trainingChecks") || "{}");
+let timerSeconds = 120, timerInterval = null;
+
+function save(){ localStorage.setItem("trainingChecks",JSON.stringify(checks)); updateProgress(); }
+
+function key(w,d,i){ return `w${w}-${d}-${i}`; }
+
+function renderTabs(){
+ const el=document.getElementById("tabs");
+ el.innerHTML=plans.map(p=>`<button class="tab ${p.week===currentWeek?'active':''}" onclick="setWeek(${p.week})">Semana ${p.week}</button>`).join("");
+}
+
+function setWeek(w){currentWeek=w;localStorage.setItem("currentWeek",w);render();}
+function render(){
+ renderTabs();
+ const plan=plans.find(p=>p.week===currentWeek);
+ document.getElementById("content").innerHTML=`
+  <div class="week-title">
+    <h2>Semana ${plan.week}</h2>
+    <button onclick="clearWeek()">↻ Limpar semana</button>
+  </div>
+  ${plan.days.map((d,di)=>dayHTML(plan.week,d,di)).join("")}
+ `;
+ updateProgress();
+}
+
+
+function paceToSpeed(pace){
+  const parts = pace.split(":").map(Number);
+  const minutes = parts[0] + parts[1]/60;
+  return (60/minutes);
+}
+function paceRangeToSpeed(paceText){
+  const m = paceText.match(/(\d+:\d+)\s*[–-]\s*(\d+:\d+)/);
+  if(!m) return null;
+  const s1 = paceToSpeed(m[1]);
+  const s2 = paceToSpeed(m[2]);
+  return `${Math.min(s1,s2).toFixed(1)}–${Math.max(s1,s2).toFixed(1)} km/h`;
+}
+function speedForPace(paceText){
+  const m = paceText.match(/(\d+:\d+)/);
+  if(!m) return null;
+  return `${paceToSpeed(m[1]).toFixed(1)} km/h`;
+}
+
+function dayHTML(w,d,di){
+ let ex=d.exercises.map((x,i)=>{
+   const k=key(w,d.day,i), done=!!checks[k];
+   const resource = exerciseResources[x[0]];
+   const help = resource ? `<div class="exercise-help"><a class="help-link" href="${resource[0]}" target="_blank" rel="noopener">${resource[1]}</a></div>` : "";
+   return `<div class="exercise ${done?'completed':''}">
+    <input type="checkbox" ${done?'checked':''} onchange="toggleCheck('${k}',this.checked)">
+    <div><span class="exercise-name">${x[0]}</span><span class="exercise-detail">${x[1]}</span>${help}</div>
+    <div class="exercise-actions"><button class="mini" onclick="openTimer(${d.rest},'Descanso')">⏱️</button></div>
+   </div>`;
+ }).join("");
+
+ return `<article class="day-card">
+   <div class="day-head">
+    <div><h3>${d.day}</h3><p>${d.focus} • ${d.time}</p></div>
+    <span class="badge">${d.exercises.length?d.exercises.length+' exercícios':'Corrida'}</span>
+   </div>
+   <div class="run-box">
+    <strong>🏃 ${d.run}</strong>
+    <span>Ritmo: ${d.pace}</span>
+    ${paceRangeToSpeed(d.pace) ? `<span style="display:block;margin-top:4px;font-weight:700;color:#222">⚡ Velocidade na esteira: ${paceRangeToSpeed(d.pace)}</span>` : (speedForPace(d.pace) ? `<span style="display:block;margin-top:4px;font-weight:700;color:#222">⚡ Velocidade na esteira: ${speedForPace(d.pace)}</span>` : "")}
+   </div>
+   ${d.exercises.length?`<div class="section"><h4>🏋️ Fortalecimento</h4>${ex}</div>`:''}
+   <div class="actions">
+    <button class="primary" onclick="openTimer(${d.rest},'Descanso')">▶ Cronômetro</button>
+    <button class="secondary" onclick="markDay(${w},'${d.day}',${d.exercises.length})">✓ Marcar treino</button>
+   </div>
+ </article>`;
+}
+
+function toggleCheck(k,val){checks[k]=val;save();render();}
+function markDay(w,day,count){
+ if(!count){alert("Corrida concluída! Você pode registrar o treino manualmente.");return;}
+ for(let i=0;i<count;i++) checks[key(w,day,i)]=true;
+ save();render();
+}
+function clearWeek(){
+ if(!confirm("Limpar os exercícios concluídos desta semana?")) return;
+ const plan=plans.find(p=>p.week===currentWeek);
+ plan.days.forEach(d=>d.exercises.forEach((_,i)=>delete checks[key(currentWeek,d.day,i)]));
+ save();render();
+}
+function updateProgress(){
+ let total=0,done=0;
+ plans.forEach(p=>p.days.forEach(d=>d.exercises.forEach((_,i)=>{total++;if(checks[key(p.week,d.day,i)])done++;})));
+ const pct=total?Math.round(done/total*100):0;
+ document.getElementById("progressBar").style.width=pct+"%";
+ document.getElementById("progressText").textContent=pct+"%";
+}
+function openTimer(seconds=120,label="Descanso"){
+ timerSeconds=seconds; document.getElementById("timerLabel").value=label;
+ document.getElementById("timer").classList.add("show"); updateTimer();
+}
+function closeTimer(){pauseTimer();document.getElementById("timer").classList.remove("show");}
+function toggleTimer(){
+ if(timerInterval){pauseTimer();return;}
+ document.getElementById("timerStart").textContent="Pausar";
+ timerInterval=setInterval(()=>{
+   timerSeconds--; updateTimer();
+   if(timerSeconds<=0){pauseTimer(); alert("⏰ Tempo encerrado!");}
+ },1000);
+}
+function pauseTimer(){clearInterval(timerInterval);timerInterval=null;document.getElementById("timerStart").textContent="Iniciar";}
+function resetTimer(){pauseTimer();timerSeconds=Number(prompt("Quantos segundos?",timerSeconds)||120);updateTimer();}
+function updateTimer(){
+ let m=Math.floor(timerSeconds/60),s=timerSeconds%60;
+ document.getElementById("timerDisplay").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+}
+render();
+</script>
+</body>
+</html>
